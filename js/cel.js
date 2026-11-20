@@ -13,6 +13,7 @@
     uniform float uHalftone, uTime, uExp;
     uniform vec3 uInk, uShadowTint, uLvl;
     uniform float uInvert, uSpeed, uFlash, uTone, uAspect;
+    uniform mat4 uCamMat; uniform float uTanF;
     varying vec2 vUv;
 
     const float TAU = 6.2831853;
@@ -42,11 +43,17 @@
       // --- screentone halftone in true-shadow areas ---
       float shadeW = (1.0 - b0) * smoothstep(0.42, 0.16, l) * uHalftone * (1.0 - sky);
       if (shadeW > 0.001) {
-        vec2 hp = (vUv * uRes) / 7.0;
+        // dots anchored in WORLD space (via view-position reconstruction) so they
+        // travel with the surface; screen-space dots swim during motion and read
+        // as a translucent grille over walls
+        vec2 nd = vUv * 2.0 - 1.0;
+        vec3 vp = vec3(nd.x * uTanF * uAspect, nd.y * uTanF, -1.0) * d0;
+        vec3 wp = (uCamMat * vec4(vp, 1.0)).xyz;
+        vec2 hp = vec2(wp.x + wp.z, wp.y + wp.z * 0.5) / 0.085;
         float d = length(fract(hp) - 0.5);
-        float rad = mix(0.46, 0.06, clamp(l * 1.8, 0.0, 1.0));
+        float rad = mix(0.40, 0.05, clamp(l * 1.8, 0.0, 1.0));
         float cov = smoothstep(rad + 0.07, rad - 0.07, d);
-        col *= mix(1.0, 1.0 - 0.82 * cov, shadeW);
+        col *= mix(1.0, 1.0 - 0.7 * cov, shadeW);
       }
 
       // --- ink outlines: normal-difference + depth-discontinuity ---
@@ -123,6 +130,7 @@
         uLvl: { value: new THREE.Vector3(...C.levels) },
         uInvert: { value: 0 }, uSpeed: { value: 0 }, uFlash: { value: 0 }, uTone: { value: 0 },
         uAspect: { value: 1 },
+        uCamMat: { value: new THREE.Matrix4() }, uTanF: { value: 1.0 },
       },
     });
     this.quadScene = new THREE.Scene();
@@ -149,6 +157,9 @@
     if (!this.enabled) { r.setRenderTarget(null); r.render(scene, camera); return; }
     const u = this.mat.uniforms;
     u.uNear.value = camera.near; u.uFar.value = camera.far;
+    camera.updateMatrixWorld();
+    u.uCamMat.value.copy(camera.matrixWorld);
+    u.uTanF.value = Math.tan(camera.fov * Math.PI / 360);
     u.uTime.value = this.time;
     u.uInvert.value = this.fx.invert; u.uSpeed.value = this.fx.speed;
     u.uFlash.value = this.fx.flash;   u.uTone.value = this.fx.tone;
