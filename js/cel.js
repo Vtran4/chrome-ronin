@@ -85,11 +85,14 @@
         col *= 1.0 - uSpeed * 0.3 * smoothstep(0.02, 0.14, r) * (1.0 - smoothstep(0.14, 0.3, r));
       }
       if (uTone > 0.001) {
-        float v = smoothstep(0.28, 0.8, r) * uTone;
-        vec2 h2 = (vUv * uRes) / 5.0;
+        // danger wash stays in the outer ring so gameplay center stays clean;
+        // sparse dots only — a dense screen-space dot screen made solid objects
+        // read as translucent grates for ~1 s after each hit
+        float v = smoothstep(0.42, 0.9, r) * uTone;
+        vec2 h2 = (vUv * uRes) / 9.0;
         float d2 = length(fract(h2 + vec2(2.5)) - 0.5);
-        float cov2 = smoothstep(0.4, 0.22, d2);
-        col = mix(col, vec3(0.62, 0.04, 0.12), v * (0.5 + 0.5 * cov2));
+        float cov2 = smoothstep(0.32, 0.14, d2);
+        col = mix(col, vec3(0.62, 0.04, 0.12), v * (0.22 + 0.34 * cov2));
       }
       col = mix(col, vec3(1.0) - col, uInvert);
       col = mix(col, vec3(1.0), uFlash);
