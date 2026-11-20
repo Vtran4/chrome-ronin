@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chrome Ronin — cyberpunk manga FPS</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23101322'/%3E%3Cpath d='M3 13L8 3l5 10' stroke='%2327e8ff' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Rock+Salt&family=Yusei+Magic&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; overflow: hidden; background: #0d1020; width: 100%; height: 100%; }
+  #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: none; }
+  .manga-font { font-family: 'Anton', 'Yusei Magic', 'Yu Gothic', sans-serif; }
+  .hand-font { font-family: 'Rock Salt', 'Yusei Magic', 'Yu Gothic', cursive; }
+  .hud { position: fixed; top: 14px; left: 16px; color: #f2f4ff; z-index: 5; user-select: none; }
+  .hud h1 { font-size: 18px; margin: 0; letter-spacing: .08em; }
+  .hud p { font-size: 11px; margin: 3px 0 0; opacity: .75; font-family: sans-serif; }
+  #snd { position: fixed; top: 12px; right: 14px; z-index: 6; user-select: none;
+         font-family: 'Anton', sans-serif; font-size: 13px; letter-spacing: .06em;
+         color: #eafcff; background: #16203a; border: 2px solid #27e8ff; border-radius: 2px;
+         padding: 7px 13px; box-shadow: 0 0 12px rgba(39,232,255,.35); }
+  #snd:hover { background: #1d2c4e; }
+  #boot { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+          color: #9fb4ff; font-family: 'Anton', sans-serif; font-size: 16px; letter-spacing: .12em; z-index: 4; }
+  .panel { position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+           flex-direction: column; z-index: 8; background: rgba(8, 10, 22, 0.55); user-select: none; }
+  .panel .card { background: #f5f2e9; color: #101322; border: 4px solid #101322;
+                 border-radius: 2px; padding: 34px 58px; text-align: center;
+                 box-shadow: 10px 10px 0 rgba(16,19,34,.75); }
+  .panel h2 { font-family: 'Anton', 'Yusei Magic', sans-serif; color: #101322;
+              font-size: 36px; margin: 0 0 6px; letter-spacing: .04em; }
+  .panel .sub { color: #3c4258; font-size: 14px; margin: 0 0 22px; font-family: sans-serif; }
+  .panel button { display: block; width: 250px; margin: 10px auto; padding: 11px 0;
+                  font-family: 'Anton', sans-serif; font-size: 16px; letter-spacing: .06em;
+                  color: #f5f2e9; background: #101322; border: 2px solid #101322;
+                  border-radius: 2px; cursor: pointer; }
+  .panel button:hover { background: #e8235f; border-color: #101322; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud manga-font"><h1>CHROME RONIN</h1><p id="hint"></p></div>
+<button id="snd">Enable sound</button>
+<div id="menu" class="panel">
+  <div class="card">
+    <h2>CHROME RONIN</h2>
+    <p class="sub">cyberpunk manga fps &mdash; vertical slice</p>
+    <button id="btn-play">Start run</button>
+    <p class="sub" id="menu-best">No score yet today</p>
+  </div>
+</div>
+<div id="pause" class="panel">
+  <div class="card">
+    <h2>PAUSED</h2>
+    <p class="sub">the city holds its breath</p>
+    <button id="btn-resume">Resume</button>
+    <button id="btn-restart">Restart run</button>
+    <button id="btn-quit">Quit to main screen</button>
+  </div>
+</div>
+<div id="endpanel" class="panel">
+  <div class="card">
+    <h2 id="end-title">RUN OVER</h2>
+    <p class="sub" id="end-best">Best of the day</p>
+    <h2 id="end-score" style="font-size:52px">0</h2>
+    <p class="sub">Click anywhere to run again</p>
+  </div>
+</div>
+<div id="boot">BOOTING THE NEON&hellip;</div>
+<script>
+  // error collector — installed before any script runs
+  window.__errors = [];
+  window.onerror = function (msg, src, line, col, err) {
+    window.__errors.push({ m: String(msg), s: String(src).split('/').pop(), l: line, c: col,
+                           st: err && err.stack ? String(err.stack).split('\n').slice(0, 4).join(' | ') : '' });
+  };
+  window.addEventListener('unhandledrejection', function (e) {
+    window.__errors.push({ m: 'unhandledrejection: ' + String(e.reason), s: '', l: 0, c: 0, st: '' });
+  });
+</script>
+<script src="vendor/three.bundle.js"></script>
+<script src="js/config.js"></script>
+<script src="js/util.js"></script>
+<script src="js/cel.js"></script>
+<script src="js/world.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
