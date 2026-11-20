@@ -23,6 +23,45 @@
   #snd:hover { background: #1d2c4e; }
   #boot { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
           color: #9fb4ff; font-family: 'Anton', sans-serif; font-size: 16px; letter-spacing: .12em; z-index: 4; }
+  /* ---- in-game HUD ---- */
+  #xhair { position: fixed; left: 50%; top: 50%; width: 3px; height: 3px; margin: -1.5px;
+           background: #f5f2e9; box-shadow: 0 0 0 1px #101322; z-index: 5; display: none; }
+  #hud-bl { position: fixed; left: 18px; bottom: 14px; z-index: 5; display: none;
+            font-family: 'Anton', sans-serif; color: #f5f2e9; text-shadow: 2px 2px 0 #101322; user-select: none; }
+  #hud-bl span { font-size: 13px; opacity: .8; margin-right: 4px; }
+  #hud-bl b { font-size: 30px; margin-right: 18px; }
+  #hp { color: #ff5d8a; } #armor { color: #4fb8ff; }
+  #hud-br { position: fixed; right: 18px; bottom: 14px; z-index: 5; display: none; text-align: right;
+            font-family: 'Anton', sans-serif; color: #f5f2e9; text-shadow: 2px 2px 0 #101322; user-select: none; }
+  #wname { font-size: 14px; opacity: .85; letter-spacing: .08em; }
+  #ammo { font-size: 34px; color: #ffb13d; }
+  #hud-tc { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 5; display: none;
+            text-align: center; font-family: 'Anton', sans-serif; color: #f5f2e9;
+            text-shadow: 2px 2px 0 #101322; user-select: none; }
+  #score { font-size: 30px; } #combo { font-size: 22px; color: #27e8ff; margin-left: 8px; }
+  #waveinfo { font-size: 13px; letter-spacing: .14em; opacity: .9; }
+  /* ---- manga FX ---- */
+  .onomatopoeia { position: fixed; z-index: 7; display: none; pointer-events: none;
+                  font-family: 'Yusei Magic', 'Rock Salt', 'Yu Gothic', sans-serif;
+                  font-weight: 900; font-size: 42px; color: #f5f2e9;
+                  -webkit-text-stroke: 2.5px #101322; transform: rotate(-8deg);
+                  text-shadow: 4px 4px 0 rgba(16,19,34,.85); }
+  .onomatopoeia.big { font-size: 74px; color: #ffd23e; }
+  .onomatopoeia.pop { display: block; animation: onopop .55s ease-out forwards; }
+  @keyframes onopop {
+    0% { opacity: 0; transform: rotate(-8deg) scale(0.3); }
+    18% { opacity: 1; transform: rotate(-8deg) scale(1.25); }
+    30% { transform: rotate(-8deg) scale(1); }
+    78% { opacity: 1; }
+    100% { opacity: 0; transform: rotate(-8deg) scale(1.05) translateY(-14px); }
+  }
+  #panelsplit { position: fixed; inset: 0; z-index: 6; display: none; pointer-events: none; }
+  #panelsplit.on { display: block; }
+  #panelsplit div { position: absolute; left: -10%; width: 120%; height: 10px; background: #f5f2e9;
+                    box-shadow: 0 0 0 3px #101322; }
+  #panelsplit div:nth-child(1) { top: 22%; transform: rotate(-2.5deg); }
+  #panelsplit div:nth-child(2) { top: 55%; transform: rotate(1.8deg); }
+  #panelsplit div:nth-child(3) { top: 82%; transform: rotate(-1deg); }
   .panel { position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
            flex-direction: column; z-index: 8; background: rgba(8, 10, 22, 0.55); user-select: none; }
   .panel .card { background: #f5f2e9; color: #101322; border: 4px solid #101322;
@@ -40,7 +79,11 @@
 </head>
 <body>
 <canvas id="c"></canvas>
-<div class="hud manga-font"><h1>CHROME RONIN</h1><p id="hint"></p></div>
+<div id="xhair"></div>
+<div id="hud-tc"><div><span id="score">0</span><span id="combo"></span></div><div id="waveinfo"></div></div>
+<div id="hud-bl"><span>HP</span><b id="hp">100</b><span>ARMOR</span><b id="armor">0</b></div>
+<div id="hud-br"><div id="wname">KAGEROU</div><div id="ammo">&#8734;</div></div>
+<div class="hud manga-font"><h1>CHROME RONIN</h1><p id="hint">WASD move &middot; SHIFT dash &middot; SPACE jump &middot; 1/2 weapons &middot; R restart</p></div>
 <button id="snd">Enable sound</button>
 <div id="menu" class="panel">
   <div class="card">
@@ -84,6 +127,13 @@
 <script src="js/util.js"></script>
 <script src="js/cel.js"></script>
 <script src="js/world.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/player.js"></script>
+<script src="js/weapons.js"></script>
+<script src="js/enemies.js"></script>
+<script src="js/game.js"></script>
+<script src="js/bot.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

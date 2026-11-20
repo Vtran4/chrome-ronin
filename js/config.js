@@ -24,13 +24,13 @@ window.CFG = {
     scatter: { name: 'ONI SCATTER',   dmg: 10, rate: 0.62, spread: 0.055, pellets: 8, range: 24, kick: 2.6, ammoMax: 60, ammoStart: 24 },
   },
   // ---- enemies ----
-  drone: { hp: 26, speed: 4.2, dmg: 8,  attackCd: 1.4, score: 100, radius: 0.45, hover: [1.1, 2.4] },
+  drone: { hp: 26, speed: 4.2, dmg: 6,  attackCd: 1.9, score: 100, radius: 0.45, hover: [1.1, 2.4] },
   oni:   { hp: 95, speed: 3.1, dmg: 24, attackCd: 2.2, score: 400, radius: 0.6,
            telegraph: 0.55, lungeSpeed: 14, lungeTime: 0.35, lungeRange: 3.4 },
   drop:  { health: 0.30, armor: 0.18, ammo: 0.55, healthAmt: 18, armorAmt: 20, ammoAmt: 8 },
   // ---- waves: [drones, onis] per wave, spawn interval shrinks ----
   waves: [[4,0],[5,1],[7,2],[8,3],[11,4]],
-  waveBreak: 8, spawnGap: 0.9, maxAlive: 10,
+  waveBreak: 8, spawnGap: 1.1, maxAlive: 8,
   // ---- scoring ----
   comboMax: 8, comboStep: 2, // +2 mult per N clean kills
   comboPerStep: 3,
