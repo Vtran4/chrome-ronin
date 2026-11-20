@@ -54,6 +54,25 @@
       neon(3.4, 0.08, 0.16, -7, 1.14, -6 + 1.68, CYAN);
       neon(6.2, 0.08, 0.16, -6, 1.84, 13 - 2.92, MAG);
 
+      // hand-lettered vertical banners (canvas textures — same pipeline as the HUD look)
+      function banner(text, color, x, y, z, ry) {
+        const cv = document.createElement('canvas'); cv.width = 128; cv.height = 512;
+        const p = cv.getContext('2d');
+        p.fillStyle = '#181d2e'; p.fillRect(0, 0, 128, 512);
+        p.strokeStyle = color; p.lineWidth = 7; p.strokeRect(7, 7, 114, 498);
+        p.fillStyle = color; p.textAlign = 'center'; p.textBaseline = 'middle';
+        p.font = '900 92px "Yu Gothic", "MS Gothic", sans-serif';
+        for (let i = 0; i < text.length; i++) p.fillText(text[i], 64, 74 + i * 110);
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 6.0),
+          new THREE.MeshLambertMaterial({ map: new THREE.CanvasTexture(cv), emissive: 0x3a3a3a, side: THREE.DoubleSide }));
+        m.position.set(x, y, z); m.rotation.y = ry || 0;
+        group.add(m);
+      }
+      banner('電脳道場', '#ff2e88', -12, 3.6, -20.35, 0);
+      banner('撃的', '#27e8ff', 12, 3.6, -20.35, 0);
+      banner('ねおん', '#ffb13d', -20.35, 3.6, -6, Math.PI / 2);
+      banner('浪人', '#27e8ff', 20.35, 3.6, 6, Math.PI / 2);
+
       // lights
       scene.add(new THREE.HemisphereLight(0x6a7aa8, 0x1c1826, 1.35));
       const sun = new THREE.DirectionalLight(0xeaf0ff, 2.7);
