@@ -45,12 +45,25 @@
       // weapon choice + fire when roughly on target
       if (best) {
         const dist = Math.sqrt(bd);
-        if (dist < 11 && weapons.ammo.scatter > 0) weapons.switchTo('scatter');
+        // rocket when a cluster of 3+ sits in the mid range and we have ammo
+        let cluster = 0;
+        for (const e of game.enemies) {
+          const d = e.group.position.distanceTo(player.pos);
+          if (d < 12) cluster++;
+        }
+        if (weapons.ammo.rocket > 0 && cluster >= 3 && dist > 6) weapons.switchTo('rocket');
+        else if (dist < 11 && weapons.ammo.scatter > 0) weapons.switchTo('scatter');
         else weapons.switchTo('pistol');
+        const aimY = weapons.cur === 'rocket'
+          ? best.group.position.y + Math.min(2.2, dist * dist * CFG.weapons.rocket.projGrav / (2 * CFG.weapons.rocket.projSpeed * CFG.weapons.rocket.projSpeed) * 1.15)
+          : best.group.position.y;
         const dx = best.group.position.x - player.pos.x, dz = best.group.position.z - player.pos.z;
         const wantYaw = Math.atan2(-dx, -dz);
+        const wantPitch = weapons.cur === 'rocket'
+          ? Math.atan2(aimY - player.eye.y, Math.hypot(dx, dz)) : player.pitch;
+        player.pitch = U.clamp(player.pitch + U.clamp(wantPitch - player.pitch, -0.08, 0.08), -1.4, 1.4);
         let dy = Math.abs(((wantYaw - player.yaw + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
-        inp.fire = dy < 0.16 && best.group.position.y < 3.2;
+        inp.fire = dy < 0.16 && best.group.position.y < 3.8;
       } else inp.fire = false;
     },
   };

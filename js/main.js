@@ -7,7 +7,7 @@
   const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: false, powerPreference: 'high-performance' });
   renderer.setPixelRatio(1);
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(CFG.fov, 1, 0.05, 220);
+  const camera = new THREE.PerspectiveCamera(CFG.fov, 1, 0.05, 500);
   camera.rotation.order = 'YXZ';
   scene.add(camera);
 
@@ -15,6 +15,17 @@
   const cel = new CelPass(renderer);
   if (qs.get('manga') === '0') cel.enabled = false;
   const lockres = qs.has('lockres') || qs.has('t');
+
+  // rocketpack thruster cones + blinking rooftop beacon handle
+  const thrustMat = new THREE.MeshBasicMaterial({ color: 0xffb13d, transparent: true, opacity: 0.9 });
+  const mkThrust = (off) => {
+    const m = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.55, 6), thrustMat);
+    m.rotation.x = Math.PI; m.visible = false; scene.add(m);
+    return { mesh: m, off };
+  };
+  const thrustL = mkThrust(-0.15), thrustR = mkThrust(0.15);
+  let beaconMesh = null;
+  world.group.traverse(o => { if (o.userData.beacon) beaconMesh = o; });
 
   window.__game = { scene, camera, renderer, cel, world, qs, ray: new THREE.Raycaster() };
   Fx.init();
@@ -28,13 +39,22 @@
     onShot: (point, ownerMesh) => {
       Fx.onShotHit(point, ownerMesh);
       const def = weapons.defs[weapons.cur];
-      if (ownerMesh) ownerMesh.userData.enemy.hurt(def.dmg);
+      if (ownerMesh) {
+        const crit = U.rng() < CFG.crit.chance;
+        const dmg = Math.round(def.dmg * (crit ? CFG.crit.mult : 1));
+        ownerMesh.userData.enemy.hurt(dmg);
+        Fx.dmgNum(point, dmg, crit);
+      }
     },
   };
 
   // ---- input ----
   const inp = { fwd: 0, back: 0, left: 0, right: 0, jump: 0, dash: 0, fire: 0, dx: 0, dy: 0 };
   window.__inp = inp;
+  // taps shorter than one frame must still shoot: latch the press until a frame eats it
+  let fireHeld = false, fireLatch = false;
+  window.addEventListener('mousedown', e => { if (e.button === 0) { fireHeld = true; fireLatch = true; } });
+  window.addEventListener('mouseup', e => { if (e.button === 0) fireHeld = false; });
   const playModes = () => Game.mode === 'combat' || Game.mode === 'break';
   function key(e, down) {
     if (!playModes() && !AUTO) return;
@@ -43,10 +63,11 @@
       case 'KeyS': case 'ArrowDown': inp.back = down; break;
       case 'KeyA': case 'ArrowLeft': inp.left = down; break;
       case 'KeyD': case 'ArrowRight': inp.right = down; break;
-      case 'Space': if (down) inp.jump = true; e.preventDefault(); break;
+      case 'Space': inp.jump = !!down; e.preventDefault(); break;
       case 'ShiftLeft': case 'ShiftRight': if (down) inp.dash = true; break;
       case 'Digit1': if (down) weapons.switchTo('pistol'); break;
       case 'Digit2': if (down) weapons.switchTo('scatter'); break;
+      case 'Digit3': if (down) weapons.switchTo('rocket'); break;
       case 'KeyR': if (down && playModes()) startRun(); break;
     }
   }
@@ -55,8 +76,6 @@
   window.addEventListener('mousemove', e => {
     if (document.pointerLockElement === canvas) { inp.dx += e.movementX; inp.dy += e.movementY; }
   });
-  window.addEventListener('mousedown', e => { if (e.button === 0) inp.fire = 1; });
-  window.addEventListener('mouseup', e => { if (e.button === 0) inp.fire = 0; });
   document.addEventListener('pointerlockchange', () => {
     if (document.pointerLockElement !== canvas && playModes()) { Game.mode = 'pause'; show('pause'); }
   });
@@ -67,12 +86,12 @@
   }
   function hideAll() { show(''); }
   function startRun() {
-    hideAll();
+    hideAll(); fireLatch = false;
     Game.start();
     if (!AUTO && canvas.requestPointerLock) canvas.requestPointerLock();
   }
   U.el('btn-play').onclick = () => { window.Audio.enable(); startRun(); };
-  U.el('btn-resume').onclick = () => { hideAll(); Game.mode = 'combat'; canvas.requestPointerLock && canvas.requestPointerLock(); };
+  U.el('btn-resume').onclick = () => { hideAll(); fireLatch = false; Game.mode = 'combat'; canvas.requestPointerLock && canvas.requestPointerLock(); };
   U.el('btn-restart').onclick = startRun;
   U.el('btn-quit').onclick = () => { Game.mode = 'menu'; show('menu'); refreshMenuBest(); };
   U.el('snd').onclick = function () {
@@ -102,6 +121,7 @@
   if (AUTO) { setTimeout(() => { hideAll(); Game.start(); }, 100); }
   else if (stReq && stReq !== 'menu') {
     setTimeout(() => { hideAll(); Game.debugState(stReq, player); }, 100);
+    if (stReq === 'hover') setTimeout(() => { inp.jump = true; }, 900);
   }
 
   // ---- HUD ----
@@ -111,8 +131,10 @@
       U.el(id).style.display = vis ? 'block' : 'none';
     U.el('hp').textContent = Math.max(0, Math.ceil(player.hp));
     U.el('armor').textContent = Math.ceil(player.armor);
-    U.el('ammo').textContent = weapons.cur === 'pistol' ? '\u221E' : weapons.ammo.scatter;
+    U.el('ammo').textContent = weapons.ammo[weapons.cur] === Infinity ? '\u221E' : weapons.ammo[weapons.cur];
     U.el('wname').textContent = weapons.defs[weapons.cur].name;
+    U.el('fuelbar').style.width = Math.round(player.fuel * 100) + '%';
+    U.el('fuelwrap').style.opacity = player.fuel > 0.99 ? 0.45 : 1;
     U.el('score').textContent = U.fmt(Game.score);
     U.el('combo').textContent = Game.combo > 1 ? '\u00D7' + Game.combo : '';
     U.el('waveinfo').textContent = Game.mode === 'break'
@@ -128,8 +150,11 @@
       cel.tick(dt);
       if (playModes()) {
         if (AUTO) Bot.update(dt, inp, player, Game, weapons);
+        inp.fire = (fireHeld || fireLatch) && playModes() && !AUTO ? 1 : (AUTO ? inp.fire : 0);
+        fireLatch = false;
         player.update(dt, inp);
         if (inp.fire) weapons.tryFire(player, targets(), hooks);
+        weapons.updateRockets(dt);
         Game.update(dt, player);
       }
       if (Game.mode === 'end' && U.el('endpanel').style.display !== 'flex') {
@@ -141,6 +166,25 @@
     }
     weapons.update(dt, player);
     Fx.update(dt, cel);
+    // rocketpack thruster: twin flames under the boots + audio wash
+    const thrusting = player.thrusting && playModes();
+    for (const t of [thrustL, thrustR]) {
+      t.mesh.visible = thrusting;
+      if (thrusting) {
+        t.mesh.position.set(player.pos.x + t.off, player.pos.y + 0.28, player.pos.z);
+        t.mesh.scale.y = 0.7 + Math.random() * 0.6;
+      }
+    }
+    if (thrusting && U.rng() < 0.35) {
+      const s = new THREE.Mesh(new THREE.SphereGeometry(0.05, 5, 4),
+        new THREE.MeshBasicMaterial({ color: 0xffb13d }));
+      s.position.set(player.pos.x + U.rand(-0.2, 0.2), player.pos.y + 0.05, player.pos.z + U.rand(-0.2, 0.2));
+      s.userData.ttl = 0.18;
+      scene.add(s); Fx.sparks.push(s);
+    }
+    window.Audio.thrust(thrusting);
+    // antenna beacon blink
+    if (beaconMesh) beaconMesh.visible = Math.floor(performance.now() / 600) % 2 === 0;
     camera.position.copy(player.eye).add(Fx.shakeVec);
     camera.rotation.set(player.pitch, player.yaw, 0);
     cel.render(scene, camera);
@@ -168,6 +212,7 @@
       mode: Game.mode, wave: Game.wave, score: Game.score, combo: Game.combo,
       kills: Game.kills, hp: Math.ceil(player.hp), armor: Math.ceil(player.armor),
       alive: Game.enemies.length, cel: cel.enabled, scale: Math.round(scale * 100) / 100,
+      fuel: Math.round(player.fuel * 100) / 100, rocketAmmo: weapons.ammo.rocket,
     });
   };
   requestAnimationFrame(frame);

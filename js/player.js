@@ -10,6 +10,7 @@
     this.onGround = false; this.canAirDash = true;
     this.dashT = 0; this.dashCd = 0; this.iframe = 0;
     this.hp = CFG.hpMax; this.armor = 0;
+    this.fuel = 1; this.thrusting = false; this.prevJump = false;
     this.colliders = colliders;
     this.eye = new THREE.Vector3();
     this.bob = 0; this.landT = 0;
@@ -88,8 +89,20 @@
       const rate = this.onGround ? 14 : 3.5;
       this.vel.x = U.damp(this.vel.x, ax, rate, dt);
       this.vel.z = U.damp(this.vel.z, az, rate, dt);
-      if (inp.jump && this.onGround) { this.vel.y = CFG.jumpV; this.onGround = false; inp.jump = false; }
-      this.vel.y -= CFG.gravity * dt;
+      // jump = fresh press; rocketpack = hold jump airborne to thrust up on fuel
+      const PK = CFG.rocketpack;
+      this.thrusting = false;
+      if (inp.jump && !this.prevJump && this.onGround) {
+        this.vel.y = CFG.jumpV; this.onGround = false;
+        this.fuel = Math.max(0, this.fuel - PK.jumpCost);
+      }
+      if (inp.jump && !this.onGround && this.fuel > 0 && this.vel.y < PK.maxUp) {
+        this.vel.y = Math.min(this.vel.y + PK.thrust * dt, PK.maxUp);
+        this.fuel = Math.max(0, this.fuel - PK.burn * dt);
+        this.thrusting = true;
+      }
+      this.prevJump = !!inp.jump;
+      this.vel.y -= CFG.gravity * dt * (this.thrusting ? 0.3 : 1);
     }
 
     // --- integrate + collide, axis by axis ---
@@ -100,6 +113,7 @@
 
     // fell out of the world safety net
     if (this.pos.y < -6) { this.pos.set(0, 3, 12); this.vel.set(0, 0, 0); this.hurt(15); }
+    if (this.onGround) this.fuel = Math.min(1, this.fuel + CFG.rocketpack.regen * dt);
 
     // view bob while running fast on ground
     const sp = Math.hypot(this.vel.x, this.vel.z);

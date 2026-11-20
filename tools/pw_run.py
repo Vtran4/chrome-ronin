@@ -65,13 +65,17 @@ with sync_playwright() as p:
         time.sleep(1.5)
         print("SHOT:", shot(pg, "attract"))
         # state-driven moments: ?state=<name> jumps supported by game.js
-        for st in ["combat", "fx", "finisher", "endscreen"]:
+        for st in ["combat", "fx", "rocket", "hover", "wisp", "finisher", "endscreen"]:
             pg.goto(BASE + f"&state={st}")
             wait_ready(pg)
             time.sleep(1.0)
             if st in ("combat", "fx"):
-                pg.mouse.click(960, 540)   # fire: muzzle flash, sparks, hit FX
-                time.sleep(0.08)
+                pg.mouse.click(960, 540)   # fire: sparks, dmg numbers (ttl 0.8s beat input latency)
+                time.sleep(0.5)
+                print(f"FIRE_{st}:", pg.evaluate("() => JSON.stringify({score: window.Game.score, cool: Math.round(window.__game.weapons.cool*100)/100, alive: window.Game.enemies.length})"))
+            elif st == "rocket":
+                pg.mouse.click(960, 540)   # lob one — detonation + splash FX on frame
+                time.sleep(0.55)
             else:
                 time.sleep(0.65)
             print(f"SHOT_{st}:", shot(pg, st))

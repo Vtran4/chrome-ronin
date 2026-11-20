@@ -21,8 +21,10 @@
       g.player.hp = CFG.hpMax; g.player.armor = 0;
       g.player.pos.set(0, 0.1, 14); g.player.vel.set(0, 0, 0);
       g.player.yaw = Math.PI; g.player.pitch = 0;
-      g.weapons.ammo = { pistol: Infinity, scatter: CFG.weapons.scatter.ammoStart };
+      g.weapons.ammo = { pistol: Infinity, scatter: CFG.weapons.scatter.ammoStart, rocket: CFG.weapons.rocket.ammoStart };
+      g.weapons.rockets.forEach(r => g.scene.remove(r.mesh)); g.weapons.rockets.length = 0;
       g.weapons.switchTo('pistol');
+      g.player.fuel = 1;
       this.nextWave();
     },
 
@@ -39,6 +41,7 @@
       this.queue = [];
       for (let i = 0; i < w[0]; i++) this.queue.push('drone');
       for (let i = 0; i < w[1]; i++) this.queue.push('oni');
+      for (let i = 0; i < (w[2] || 0); i++) this.queue.push('wisp');
       // shuffle spawn order
       for (let i = this.queue.length - 1; i > 0; i--) { const j = U.irand(0, i); const t = this.queue[i]; this.queue[i] = this.queue[j]; this.queue[j] = t; }
       this.spawnT = 1.2; // brief breathing room before first spawn
@@ -49,7 +52,7 @@
     _spawnOne: function () {
       const kind = this.queue.pop();
       const a = U.rand(0, Math.PI * 2), r = U.rand(12, 17);
-      const pos = new THREE.Vector3(Math.cos(a) * r, kind === 'drone' ? 1.6 : 0, Math.sin(a) * r);
+      const pos = new THREE.Vector3(Math.cos(a) * r, kind === 'drone' ? 1.6 : kind === 'wisp' ? 2.2 : 0, Math.sin(a) * r);
       pos.x = U.clamp(pos.x, -CFG.arena.half + 2, CFG.arena.half - 2);
       pos.z = U.clamp(pos.z, -CFG.arena.half + 2, CFG.arena.half - 2);
       this.enemies.push(window.Enemies.spawn(kind, pos));
@@ -91,6 +94,10 @@
             const D = CFG.drop;
             if (m.userData.pickup === 'health') player.hp = Math.min(CFG.hpMax, player.hp + D.healthAmt);
             else if (m.userData.pickup === 'armor') player.armor = Math.min(CFG.armorMax, player.armor + D.armorAmt);
+            else if (m.userData.pickup === 'rocket') {
+              const w = window.__game.weapons;
+              w.ammo.rocket = Math.min(CFG.weapons.rocket.ammoMax, w.ammo.rocket + D.rocketAmt);
+            }
             else player.ammoScatter((D.ammoAmt));
             window.Audio.ui('pickup');
             window.__game.scene.remove(m); this.pickups.splice(i, 1);
@@ -100,7 +107,9 @@
         if (this.mode === 'combat' && this.queue.length === 0 && this.enemies.length === 0) {
           if (this.wave >= CFG.waves.length) return this._end('AREA CLEARED');
           this.mode = 'break'; this.breakT = CFG.waveBreak;
-          player.ammoScatter(10); // resupply between waves
+          player.ammoScatter(10);                 // resupply between waves
+          const w = window.__game.weapons;
+          w.ammo.rocket = Math.min(CFG.weapons.rocket.ammoMax, w.ammo.rocket + 1);
         } else if (this.mode === 'break') {
           this.breakT -= dt;
           if (this.breakT <= 0) this.nextWave();
@@ -119,11 +128,23 @@
 
     // --- debug jumps for pw_run shots mode ---
     debugState: function (name, player) {
-      if (name === 'combat') { this.start(); this.wave = 2; this.queue = ['drone', 'drone', 'oni', 'drone']; this.mode = 'combat'; this.spawnT = 0.01;
-        player.pos.set(0, 0.1, 6); player.yaw = 0; }
+      if (name === 'combat') { this.start(); this.wave = 2; this.queue = ['drone', 'oni']; this.mode = 'combat'; this.spawnT = 0.01;
+        player.pos.set(0, 0.1, 6); player.yaw = 0;
+        // one drone dead-center on the crosshair so the shot click lands -> dmg number on frame
+        const cd = window.Enemies.spawn('drone', new THREE.Vector3(0, 1.72, 1));
+        this.enemies.push(cd);
+        // deterministic crit hits through the live damage-number path inside the shot window
+        setTimeout(function () {
+          cd.hurt(12);
+          window.Fx.dmgNum(cd.group.position.clone().setY(cd.group.position.y + 1.5), 12, true);
+        }, 1100);
+        setTimeout(function () {
+          cd.hurt(8);
+          window.Fx.dmgNum(cd.group.position.clone().setY(cd.group.position.y + 1.5), 8, false);
+        }, 1350); }
       else if (name === 'fx') { this.start();
         player.pos.set(0, 0.1, 6); player.yaw = 0;
-        this.enemies.push(window.Enemies.spawn('drone', new THREE.Vector3(1.2, 1.8, 0))); }
+        this.enemies.push(window.Enemies.spawn('drone', new THREE.Vector3(0, 1.72, 2))); }
       else if (name === 'finisher') {
         this.start();
         player.pos.set(0, 0.1, 8); player.yaw = 0;
@@ -132,6 +153,20 @@
         // die inside the shots-mode screenshot window so the panel-split is on frame
         setTimeout(function () { const en = window.Game.enemies[0]; if (en) en.hurt(999); }, 1250);
       }
+      else if (name === 'rocket') {
+        this.start();
+        player.pos.set(0, 0.1, 6); player.yaw = 0; player.pitch = 0.03;
+        this.enemies.push(window.Enemies.spawn('drone', new THREE.Vector3(0, 1.7, -4)));
+        this.enemies.push(window.Enemies.spawn('drone', new THREE.Vector3(-2.4, 1.5, -6.5)));
+        this.enemies.push(window.Enemies.spawn('oni', new THREE.Vector3(2.2, 0, -8)));
+        window.__game.weapons.switchTo('rocket');
+      }
+      else if (name === 'wisp') { this.start();
+        player.pos.set(0, 0.1, 6); player.yaw = 0;
+        this.enemies.push(window.Enemies.spawn('wisp', new THREE.Vector3(0.6, 2.2, -7))); }
+      else if (name === 'hover') { this.start();
+        player.pos.set(0, 0.1, 10); player.yaw = 0; player.pitch = -0.75;
+        this.enemies.push(window.Enemies.spawn('drone', new THREE.Vector3(1.5, 4.5, -6))); }
       else if (name === 'endscreen') { this.score = 18450; this._end('YOU DIED'); }
     },
   };

@@ -31,6 +31,10 @@
   #hud-bl span { font-size: 13px; opacity: .8; margin-right: 4px; }
   #hud-bl b { font-size: 30px; margin-right: 18px; }
   #hp { color: #ff5d8a; } #armor { color: #4fb8ff; }
+  #fuelwrap { display: inline-block; vertical-align: middle; margin-left: -8px; transition: opacity .2s; }
+  #fuelbar-out { display: inline-block; width: 120px; height: 12px; border: 2px solid #101322;
+                 background: #1a2138; box-shadow: 2px 2px 0 rgba(16,19,34,.7); vertical-align: middle; }
+  #fuelbar { display: block; height: 100%; width: 100%; background: #ffb13d; transition: width .08s linear; }
   #hud-br { position: fixed; right: 18px; bottom: 14px; z-index: 5; display: none; text-align: right;
             font-family: 'Anton', sans-serif; color: #f5f2e9; text-shadow: 2px 2px 0 #101322; user-select: none; }
   #wname { font-size: 14px; opacity: .85; letter-spacing: .08em; }
@@ -54,6 +58,19 @@
     30% { transform: rotate(-8deg) scale(1); }
     78% { opacity: 1; }
     100% { opacity: 0; transform: rotate(-8deg) scale(1.05) translateY(-14px); }
+  }
+  /* ---- floating damage numbers ---- */
+  .dmgnum { position: fixed; z-index: 7; display: none; pointer-events: none;
+            font-family: 'Anton', 'Yusei Magic', sans-serif; font-weight: 900; font-size: 26px;
+            color: #f5f2e9; -webkit-text-stroke: 1.6px #101322; text-shadow: 3px 3px 0 rgba(16,19,34,.8); }
+  .dmgnum.crit { color: #ffd23e; font-size: 46px; transform: rotate(-4deg); }
+  .dmgnum.fly { display: block; animation: dmgfly .8s ease-out forwards; }
+  @keyframes dmgfly {
+    0% { opacity: 0; transform: translateY(6px) scale(0.5); }
+    16% { opacity: 1; transform: translateY(-4px) scale(1.15); }
+    30% { transform: translateY(-10px) scale(1); }
+    74% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-52px) scale(0.92); }
   }
   #panelsplit { position: fixed; inset: 0; z-index: 6; display: none; pointer-events: none; }
   #panelsplit.on { display: block; }
@@ -81,9 +98,9 @@
 <canvas id="c"></canvas>
 <div id="xhair"></div>
 <div id="hud-tc"><div><span id="score">0</span><span id="combo"></span></div><div id="waveinfo"></div></div>
-<div id="hud-bl"><span>HP</span><b id="hp">100</b><span>ARMOR</span><b id="armor">0</b></div>
+<div id="hud-bl"><span>HP</span><b id="hp">100</b><span>ARMOR</span><b id="armor">0</b><span id="fuelwrap">PACK</span><span id="fuelbar-out"><i id="fuelbar"></i></span></div>
 <div id="hud-br"><div id="wname">KAGEROU</div><div id="ammo">&#8734;</div></div>
-<div class="hud manga-font"><h1>CHROME RONIN</h1><p id="hint">WASD move &middot; SHIFT dash &middot; SPACE jump &middot; 1/2 weapons &middot; R restart</p></div>
+<div class="hud manga-font"><h1>CHROME RONIN</h1><p id="hint">WASD move &middot; SHIFT dash &middot; SPACE jump / hold = rocketpack &middot; 1/2/3 weapons &middot; R restart</p></div>
 <button id="snd">Enable sound</button>
 <div id="menu" class="panel">
   <div class="card">
