@@ -10,6 +10,11 @@
     if (emissive) m.emissive = new THREE.Color(emissive), m.emissiveIntensity = 1;
     return m;
   }
+  // Arena props use FLAT unlit paper-grey: Lambert shading lands prop faces on the
+  // same ink band as the near-black towers (measured 0.161 vs 0.161 sRGB), which
+  // reads as "background grid on a glass box". Unlit grey quantizes to the lightest
+  // band, so every prop pops white against the ink city behind it.
+  function propMat(color) { return new THREE.MeshBasicMaterial({ color }); }
   // crisp lit-window facade: dark plate + random neon windows, nearest-filtered
   function facadeTex(seedLit, warm) {
     const cv = document.createElement('canvas'); cv.width = cv.height = 64;
@@ -98,7 +103,7 @@
       add(half * 2 + 2, 1, half * 2 + 2, 0, -0.5, 0, new THREE.MeshLambertMaterial({ color: 0xcfd6e4, map: ftex }));
 
       // waist parapets with neon crown (the city is open beyond them)
-      const PAR = 1.15, pmat = mat(DARK);
+      const PAR = 1.15, pmat = propMat(0xaab4cc);
       add(half * 2, PAR, 1, 0, PAR / 2, -half - 0.5, pmat);
       add(half * 2, PAR, 1, 0, PAR / 2, half + 0.5, pmat);
       add(1, PAR, half * 2, -half - 0.5, PAR / 2, 0, pmat);
@@ -127,14 +132,14 @@
         for (let i = 0; i < 5; i++) p.fillRect(8 + i * 11, 52, 5, 6);
         const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
       })();
-      const panelMat = new THREE.MeshLambertMaterial({ color: 0xdde4f2, map: panelTex });
+      const panelMat = new THREE.MeshBasicMaterial({ map: panelTex });
       add(3.2, 1.1, 3.2, -7, 0.55, -6, panelMat);
       add(3.2, 1.1, 3.2, 7.4, 0.55, 6.2, panelMat);
       add(2.2, 2.3, 2.2, 0, 1.15, -11, panelMat);
       add(2.2, 2.3, 2.2, -11.5, 1.15, 8, panelMat);
-      add(5.0, 0.8, 1.6, 10, 0.4, -8.5, mat(DARK));
-      add(1.4, 4.2, 7.0, -14, 2.1, -2, mat(DARK));
-      add(1.4, 4.2, 7.0, 14, 2.1, 2, mat(DARK));
+      add(5.0, 0.8, 1.6, 10, 0.4, -8.5, propMat(0x97a2bc));
+      add(1.4, 4.2, 7.0, -14, 2.1, -2, propMat(0x97a2bc));
+      add(1.4, 4.2, 7.0, 14, 2.1, 2, propMat(0x97a2bc));
       add(6, 1.8, 6, -6, 0.9, 13, panelMat);
       add(6, 0.9, 2, -6, 0.45, 7.6, panelMat);
       add(2.6, 0.7, 2.6, -6, 0.35, 17.4, panelMat);
@@ -142,9 +147,9 @@
       neon(6.2, 0.08, 0.16, -6, 1.84, 13 - 2.92, MAG);
 
       // AC units + antenna mast with blinking beacon
-      add(1.6, 0.9, 1.2, 16, 0.45, 14, mat(DARK));
-      add(1.2, 0.7, 1.2, 12.5, 0.35, -16, mat(DARK));
-      const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 5.5, 6), mat(0x5a6377));
+      add(1.6, 0.9, 1.2, 16, 0.45, 14, propMat(0x97a2bc));
+      add(1.2, 0.7, 1.2, 12.5, 0.35, -16, propMat(0x97a2bc));
+      const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 5.5, 6), propMat(0x7a8399));
       mast.position.set(18, 2.75, -18); group.add(mast);
       const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 6), mat(0xff2e88, 0xff2e88));
       beacon.position.set(18, 5.6, -18); beacon.userData.beacon = true; group.add(beacon);
