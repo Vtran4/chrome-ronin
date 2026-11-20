@@ -119,12 +119,18 @@
 
     // --- debug jumps for pw_run shots mode ---
     debugState: function (name, player) {
-      if (name === 'combat') { this.start(); this.wave = 2; this.queue = ['drone', 'drone', 'oni', 'drone']; this.mode = 'combat'; this.spawnT = 0.01; }
-      else if (name === 'fx') { this.start(); this.queue = ['drone']; this.spawnT = 0.01; }
+      if (name === 'combat') { this.start(); this.wave = 2; this.queue = ['drone', 'drone', 'oni', 'drone']; this.mode = 'combat'; this.spawnT = 0.01;
+        player.pos.set(0, 0.1, 6); player.yaw = 0; }
+      else if (name === 'fx') { this.start();
+        player.pos.set(0, 0.1, 6); player.yaw = 0;
+        this.enemies.push(window.Enemies.spawn('drone', new THREE.Vector3(1.2, 1.8, 0))); }
       else if (name === 'finisher') {
         this.start();
-        const e = window.Enemies.spawn('oni', new THREE.Vector3(player.pos.x + 3, 0, player.pos.z - 4));
-        this.enemies.push(e); e.hp = 1;
+        player.pos.set(0, 0.1, 8); player.yaw = 0;
+        const e = window.Enemies.spawn('oni', new THREE.Vector3(0.8, 0, 4.5));
+        this.enemies.push(e);
+        // die inside the shots-mode screenshot window so the panel-split is on frame
+        setTimeout(function () { const en = window.Game.enemies[0]; if (en) en.hurt(999); }, 1250);
       }
       else if (name === 'endscreen') { this.score = 18450; this._end('YOU DIED'); }
     },

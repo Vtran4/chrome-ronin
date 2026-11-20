@@ -24,8 +24,8 @@
   #boot { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
           color: #9fb4ff; font-family: 'Anton', sans-serif; font-size: 16px; letter-spacing: .12em; z-index: 4; }
   /* ---- in-game HUD ---- */
-  #xhair { position: fixed; left: 50%; top: 50%; width: 3px; height: 3px; margin: -1.5px;
-           background: #f5f2e9; box-shadow: 0 0 0 1px #101322; z-index: 5; display: none; }
+  #xhair { position: fixed; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px;
+           border: 2px solid #f5f2e9; border-radius: 50%; box-shadow: 0 0 0 1.5px #101322; z-index: 5; display: none; }
   #hud-bl { position: fixed; left: 18px; bottom: 14px; z-index: 5; display: none;
             font-family: 'Anton', sans-serif; color: #f5f2e9; text-shadow: 2px 2px 0 #101322; user-select: none; }
   #hud-bl span { font-size: 13px; opacity: .8; margin-right: 4px; }
@@ -38,7 +38,7 @@
   #hud-tc { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 5; display: none;
             text-align: center; font-family: 'Anton', sans-serif; color: #f5f2e9;
             text-shadow: 2px 2px 0 #101322; user-select: none; }
-  #score { font-size: 30px; } #combo { font-size: 22px; color: #27e8ff; margin-left: 8px; }
+  #score { font-size: 30px; } #combo { font-size: 22px; color: #27e8ff; margin-left: 16px; }
   #waveinfo { font-size: 13px; letter-spacing: .14em; opacity: .9; }
   /* ---- manga FX ---- */
   .onomatopoeia { position: fixed; z-index: 7; display: none; pointer-events: none;

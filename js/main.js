@@ -97,7 +97,7 @@
   // ---- debug state jumps + attract ----
   const simT = qs.has('t') ? parseFloat(qs.get('t')) : Infinity;
   const stReq = qs.get('state');
-  let sim = 0, frames = 0, msEma = 16.6, last = performance.now();
+  let sim = 0, frames = 0, msEma = 16.6, fpsEma = 16.6, last = performance.now();
   show('menu'); refreshMenuBest();
   if (AUTO) { setTimeout(() => { hideAll(); Game.start(); }, 100); }
   else if (stReq && stReq !== 'menu') {
@@ -147,11 +147,13 @@
     updateHud();
     const ms = performance.now() - t0;
     msEma = msEma * 0.92 + ms * 0.08;
+    fpsEma = fpsEma * 0.9 + dt * 1000 * 0.1;   // real rAF pacing, ms per displayed frame
     frames++;
     window.__frameMs = Math.round(msEma * 10) / 10;
-    window.__fps = Math.round(1000 / msEma);
-    if (!lockres) {
-      const want = msEma > CFG.targetMs * 1.12 ? -0.06 : msEma < CFG.targetMs * 0.85 ? 0.03 : 0;
+    window.__busyMs = Math.round(msEma * 10) / 10;
+    window.__fps = Math.round(1000 / Math.max(fpsEma, 0.1));
+    if (!lockres) { // scale on displayed-frame budget, not CPU busy time
+      const want = fpsEma > CFG.targetMs * 1.12 ? -0.06 : fpsEma < CFG.targetMs * 0.85 ? 0.03 : 0;
       const ns = U.clamp(scale + want, CFG.resMin, CFG.resMax);
       if (ns !== scale) { scale = ns; cel.setSize(W, H, scale); }
     }

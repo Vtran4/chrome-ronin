@@ -33,8 +33,9 @@ pass so both layers read as one drawing.
   | Tsukumō rail | charge-pierce, hitscan | full-screen speed-line frame |
   | Yamibukuro grenade launcher | arcing splash | halftone smoke bloom |
   | Dangan kataana (melee) | dash-attack finisher | panel-split kill freeze |
-- **Enemies**: drone grunt (swarm, weak), chrome oni (melee charger, telegraphs
-  with speed lines before lunging), torii turret (static, shielded, must flank),
+- **Enemies**: drone grunt (swarm, weak; fires **slow visible plasma orbs —
+  dodge by strafing/dash i-frames, never an undodgeable hitscan**), chrome oni
+  (melee charger, telegraphs with a rear-up pose + speed lines before lunging), torii turret (static, shielded, must flank),
   and a per-tier boss at the end of tier 3. All enemies are cel-shaded with
   visible attack telegraphs — read like manga poses, not noise.
 - **Health / armor / ammo**: pickup economy exactly like DOOM 1/2 — kills drop

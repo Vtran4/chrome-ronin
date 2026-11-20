@@ -15,7 +15,7 @@ one commit per green gate.
 | **G2** | Combat loop: drone grunt (swarm) + chrome oni (telegraph→lunge), Oni scattergun, health/armor/ammo drops, 5-wave ramp, death → end screen. | `pw_run.py bot` reaches wave ≥2 |
 | **G3** | Manga FX: 1-frame impact invert, dash speed lines, kill onomatopoeia (ドドド / DOMYO!), panel-split finisher on oni kills, combo ×8 + best-of-day. | `pw_run.py shots` captures each FX |
 | **G4** | WebAudio SFX (fire/thud/hit/death/dash/pickup) + hand-lettered canvas HUD, menu/pause/end panels — no default-font UI. | smoke + shots, sound off is complete |
-| **G5** | Bot (`?auto=1` attract mode), `?seed/?t/?view/?state/?lockres` params, `pw_run.py smoke|shots|bot|fps` all green, `file://` playable (tools/embed_assets.py), neon-styled arena pass. | all four gates + file:// smoke |
+| **G5** | Bot (`?auto=1` attract mode), `?seed/?t/?view/?state/?lockres` params, `pw_run.py smoke|shots|bot|fps` all green, `file://` works directly (procedural assets = no embed step needed), neon-styled arena pass. | all four gates + file:// smoke |
 
 ## Module map (classic scripts, loaded in this order)
 

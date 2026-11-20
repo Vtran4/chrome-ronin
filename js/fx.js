@@ -46,7 +46,7 @@
       const col = enemyMesh ? 0xffe58a : 0x9fb4ff;
       const s = new THREE.Mesh(new THREE.SphereGeometry(0.12, 6, 5),
         new THREE.MeshBasicMaterial({ color: col }));
-      s.position.copy(point); s.userData.ttl = 0.09;
+      s.position.copy(point); s.userData.ttl = 0.16;
       window.__game.scene.add(s); this.sparks.push(s);
       this.shake(0.06);
     },
@@ -60,7 +60,7 @@
     },
 
     onFinisher: function (pos) {       // oni death: panel-split freeze
-      this.panelT = 0.42;
+      this.panelT = 0.7;
       this._panelEl.classList.remove('on'); void this._panelEl.offsetWidth;
       this._panelEl.classList.add('on');
       this._word(pos.clone().setY(1.6), U.pick(FINISHER_WORDS), true);
@@ -86,7 +86,9 @@
       const lowHp = p ? U.clamp(1 - p.hp / 35, 0, 1) * 0.5 : 0;
       if (lowHp > this.tone) this.tone = lowHp;
       cel.fx.invert = this.invert; cel.fx.speed = this.speed;
-      cel.fx.tone = this.tone; cel.fx.flash = this.panelT > 0.32 ? 0.7 : 0;
+      cel.fx.tone = this.tone;
+      // white pop only for the first ~2 frames of the panel-split
+      cel.fx.flash = this.panelT > 0.64 ? 0.7 : 0;
     },
   };
   window.Fx = Fx;

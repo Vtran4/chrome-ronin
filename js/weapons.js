@@ -21,9 +21,9 @@
   }
   function buildScatter() {
     const g = new THREE.Group();
-    box(g, 0.09, 0.085, 0.5, 0, 0.01, -0.2, mat(0xb8443f));
-    box(g, 0.1, 0.07, 0.18, 0, -0.055, -0.22, mat(0x222633));
-    box(g, 0.07, 0.17, 0.09, 0, -0.12, 0.06, mat(0x222633));
+    box(g, 0.09, 0.085, 0.5, 0, 0.01, -0.2, mat(0x4a3038));
+    box(g, 0.1, 0.07, 0.18, 0, -0.055, -0.22, mat(0x1c1f2b));
+    box(g, 0.07, 0.17, 0.09, 0, -0.12, 0.06, mat(0x1c1f2b));
     box(g, 0.05, 0.02, 0.02, 0, 0.055, -0.4, mat(0xffb13d, 0xffb13d));
     return g;
   }
@@ -62,7 +62,7 @@
     this.cool = def.rate;
     if (this.ammo[this.cur] !== Infinity) this.ammo[this.cur]--;
     this.kickV = def.kick;
-    this.flashT = 0.05;
+    this.flashT = 0.11;
     this.flash.visible = true;
 
     player.forward(this._d);
@@ -95,9 +95,10 @@
     this.kick = U.damp(this.kick, this.kickV, 26, dt);
     const m = this.models[this.cur];
     const bobX = Math.sin(player.bob) * 0.012, bobY = Math.abs(Math.cos(player.bob)) * 0.012;
-    m.position.set(0.22 + bobX, -0.19 + bobY - this.kick * 0.02, 0.32 - Math.min(this.kick * 0.06, 0.1));
+    // camera looks down -z: viewmodel must sit at NEGATIVE z in camera space
+    m.position.set(0.22 + bobX, -0.16 + bobY - this.kick * 0.02, -0.30 + Math.min(this.kick * 0.05, 0.08));
     m.rotation.set(this.kick * 0.16, 0, 0);
-    this.flash.position.copy(m.position).add(new THREE.Vector3(0, 0.03, -0.32));
+    this.flash.position.copy(m.position).add(new THREE.Vector3(0, 0.05, -0.34));
     this.flash.rotation.z += dt * 40;
     this.flashT -= dt;
     if (this.flashT <= 0) this.flash.visible = false;

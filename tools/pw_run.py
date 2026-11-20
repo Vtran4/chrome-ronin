@@ -68,7 +68,12 @@ with sync_playwright() as p:
         for st in ["combat", "fx", "finisher", "endscreen"]:
             pg.goto(BASE + f"&state={st}")
             wait_ready(pg)
-            time.sleep(1.6)
+            time.sleep(1.0)
+            if st in ("combat", "fx"):
+                pg.mouse.click(960, 540)   # fire: muzzle flash, sparks, hit FX
+                time.sleep(0.08)
+            else:
+                time.sleep(0.65)
             print(f"SHOT_{st}:", shot(pg, st))
         print("STATE:", pg.evaluate("window.__state()"))
         print("ERRORS:", json.dumps(errors[:20], indent=1))
@@ -104,7 +109,7 @@ with sync_playwright() as p:
 
     elif MODE == "fps":
         pg, errors = new_page(ctx)
-        pg.goto("http://127.0.0.1:8138/index.html?seed=7&auto=1")
+        pg.goto("http://127.0.0.1:8138/index.html?seed=7&auto=1&lockres")
         wait_ready(pg)
         # warm up 3s, then measure 10s
         pg.wait_for_timeout(3000)

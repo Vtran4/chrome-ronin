@@ -58,8 +58,8 @@
       scene.add(new THREE.HemisphereLight(0x6a7aa8, 0x1c1826, 1.35));
       const sun = new THREE.DirectionalLight(0xeaf0ff, 2.7);
       sun.position.set(-9, 16, 7); scene.add(sun);
-      const p1 = new THREE.PointLight(CYAN, 40, 22, 2); p1.position.set(-half + 2, 3, -half + 2); scene.add(p1);
-      const p2 = new THREE.PointLight(MAG, 40, 22, 2); p2.position.set(half - 2, 3, half - 2); scene.add(p2);
+      const p1 = new THREE.PointLight(CYAN, 22, 16, 2); p1.position.set(-half + 2, 3, -half + 2); scene.add(p1);
+      const p2 = new THREE.PointLight(MAG, 22, 16, 2); p2.position.set(half - 2, 3, half - 2); scene.add(p2);
       scene.background = new THREE.Color(0x0d1020);
       scene.fog = new THREE.Fog(0x0d1020, 30, 64);
 
